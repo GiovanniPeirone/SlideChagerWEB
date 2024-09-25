@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cambiar valor con botón</title>
+</head>
+<body>
+  <h1>Cambiar el valor de la API al hacer clic en un botón</h1>
+
+  <p>Valor actual: <span id="valor-actual">Cargando...</span></p>
+
+  <button id="cambiar-valor-boton">Cambiar Valor</button>
+  
+  <p id="mensaje"></p>
+
+  <script>
+    // Obtener el valor actual desde la API al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/info')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('valor-actual').textContent = data.mensaje;
+        })
+        .catch(error => console.error('Error al obtener el valor:', error));
+    });
+
+    // Manejar el clic en el botón
+    const boton = document.getElementById('cambiar-valor-boton');
+    boton.addEventListener('click', function() {
+      const nuevoValor = 'Nuevo valor desde botón';  // El nuevo valor que quieres establecer
+
+      // Enviar la solicitud POST a la API para cambiar el valor
+    fetch('/api/valor', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+        body: JSON.stringify({ valor: 'Nuevo valor desde botón' })  // Envía un JSON válido
+    })
+    .then(response => {
+        // Verifica si la respuesta es JSON antes de convertirla
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        } else {
+            throw new Error('La respuesta no es JSON');
+        }
+    })
+    .then(data => {
+        console.log('Respuesta recibida:', data);
+        document.getElementById('valor-actual').textContent = data.nuevoValor;
+    })
+    .catch(error => {
+        console.error('Error al actualizar el valor:', error);
+        document.getElementById('mensaje').textContent = 'Error al actualizar el valor: ' + error.message;
+    });
+    })
+  </script>
+</body>
+</html>
