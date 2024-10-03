@@ -1,7 +1,6 @@
 const { response } = require("express");
 
-function change_data(key)
-{
+function change_data(key){
     const newKey = key;
 
     fetch('api/change_data', {
