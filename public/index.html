@@ -7,35 +7,82 @@
   <style>
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
       font-family: Arial, sans-serif;
     }
-    button {
-      padding: 20px;
-      margin: 10px;
-      font-size: 18px;
-      cursor: pointer;
+    .contenedor{
+      display: flex;
+    }
+    #leftBtn{
+      width: 100%;
+      height: 500px;
+    }
+    #rightBtn{
+      width: 100%;
+      height: 500px;
     }
   </style>
 </head>
 <body>
+  <div class="contenedor">
+    <h1>codigo</h1>
+    <input type="text" id="codeInput" placeholder="Introduce el código">
+    <button id="joinRoomBtn">Unirse a la sala</button>
+  </div>
   <button id="leftBtn">Izquierda</button>
-  <input type="text" id="Codigo">
   <button id="rightBtn">Derecha</button>
+
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
 
-    document.getElementById('leftBtn').addEventListener('click', () => {
-      socket.emit('move', 'left');
+    const codeInput = document.getElementById('codeInput');
+    const joinRoomBtn = document.getElementById('joinRoomBtn');
+    const controls = document.getElementById('controls');
+    const leftBtn = document.getElementById('leftBtn');
+    const rightBtn = document.getElementById('rightBtn');
+
+    let code = null;
+    let lastClickTime = 0;
+    const clickDelay = 100; // Reducido a 100 ms para mayor rapidez
+
+    // Unirse a una sala con el código proporcionado
+    joinRoomBtn.addEventListener('click', () => {
+      code = codeInput.value;
+      if (code) {
+        console.log(`Enviando solicitud para unirse a la sala: ${code}`);
+        socket.emit('join-room', code);
+        controls.style.display = 'block'; // Mostrar los controles
+      }
     });
 
-    document.getElementById('rightBtn').addEventListener('click', () => {
-      socket.emit('move', 'right');
+    // Enviar los movimientos dentro de la sala a la que te has unido
+    leftBtn.addEventListener('click', () => {
+      const now = Date.now();
+      if (now - lastClickTime > clickDelay) {
+        lastClickTime = now;
+        console.log('Enviando movimiento: izquierda');
+        socket.emit('move', { code, direction: 'left' });
+      }
+    });
+
+    rightBtn.addEventListener('click', () => {
+      const now = Date.now();
+      if (now - lastClickTime > clickDelay) {
+        lastClickTime = now;
+        console.log('Enviando movimiento: derecha');
+        socket.emit('move', { code, direction: 'right' });
+      }
+    });
+
+    // Mensaje cuando se conecte correctamente al servidor
+    socket.on('connect', () => {
+      console.log('Conectado al servidor Socket.IO');
     });
   </script>
 </body>
